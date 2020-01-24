@@ -43,4 +43,11 @@ interface ProcessInfoInterface
 {
     public static function getDescription();
     public static function getUsage();
+
+    /**
+     * @param $argc
+     * @param $argv
+     * @return int
+     */
+    public function run($argc, $argv): int;
 }

@@ -32,33 +32,8 @@
  *
  */
 
-namespace Skyline\CLI\Plugin;
-
-
-use TASoft\EventManager\EventManager;
-use TASoft\Service\ServiceManager;
-
-class SkylineCLIPlugin
-{
-    public function runCLICommand(string $eventName, $event, EventManager $eventManager, ...$arguments)
-    {
-        if(php_sapi_name() == 'cli') {
-            global $argv;
-            array_shift($argv); // Binary file
-            $cmd = array_shift($argv); // first argument which must be the process
-
-            ServiceManager::generalServiceManager()->setParameter("cli.error-handler.enabled", true);
-
-            $processesPath = SkyGetPath('$(C)/processes.config.php');
-            if($processesPath && is_file($processesPath)) {
-
-            } else {
-                trigger_error('Process config file is not available. Please compile first', E_USER_ERROR);
-            }
-
-
-            $eventManager->trigger(SKY_EVENT_TEAR_DOWN);
-            exit();
-        }
-    }
-}
+return [
+    // By default the error handler for cli is disabled.
+    // It gets enabled before beginning a cli command.
+    'cli.error-handler.enabled' => false
+];

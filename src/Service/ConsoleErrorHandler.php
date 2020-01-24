@@ -32,33 +32,48 @@
  *
  */
 
-namespace Skyline\CLI\Plugin;
+namespace Skyline\CLI\Service;
 
 
-use TASoft\EventManager\EventManager;
-use TASoft\Service\ServiceManager;
+use Skyline\Kernel\Service\Error\AbstractErrorHandlerService;
+use Throwable;
 
-class SkylineCLIPlugin
+class ConsoleErrorHandler extends AbstractErrorHandlerService
 {
-    public function runCLICommand(string $eventName, $event, EventManager $eventManager, ...$arguments)
+    private $enabled = false;
+
+    /**
+     * ConsoleErrorHandler constructor.
+     * @param bool $enabled
+     */
+    public function __construct(bool $enabled)
     {
-        if(php_sapi_name() == 'cli') {
-            global $argv;
-            array_shift($argv); // Binary file
-            $cmd = array_shift($argv); // first argument which must be the process
+        $this->enabled = $enabled;
+    }
 
-            ServiceManager::generalServiceManager()->setParameter("cli.error-handler.enabled", true);
 
-            $processesPath = SkyGetPath('$(C)/processes.config.php');
-            if($processesPath && is_file($processesPath)) {
-
-            } else {
-                trigger_error('Process config file is not available. Please compile first', E_USER_ERROR);
+    public function handleError(string $message, int $code, $file, $line, $ctx): bool
+    {
+        if($this->enabled) {
+            $hdr = "\033[";
+            switch ( self::detectErrorLevel($code) ) {
+                case self::NOTICE_ERROR_LEVEL:      $hdr .= "0;37mNOTICE    : "; break;
+                case self::WARNING_ERROR_LEVEL:     $hdr .= "0;33mWARNING   : "; break;
+                case self::DEPRECATED_ERROR_LEVEL:  $hdr .= "1;30mDEPRECATED: "; break;
+                default:
+                                                    $hdr .= "0;31mERROR     : ";
             }
 
-
-            $eventManager->trigger(SKY_EVENT_TEAR_DOWN);
-            exit();
+            fprintf(STDERR, "$hdr%s\033[0m\n            => \033[0;32m%s:\033[0;34m%d\033[m\n", $message, $file, $line);
         }
+        return false;
+    }
+
+    public function handleException(Throwable $throwable): bool
+    {
+        if($this->enabled) {
+
+        }
+        return false;
     }
 }

@@ -32,33 +32,22 @@
  *
  */
 
-namespace Skyline\CLI\Plugin;
+use Skyline\CLI\Service\ConsoleErrorHandler;
+use Skyline\Kernel\Config\MainKernelConfig;
+use TASoft\Service\Config\AbstractFileConfiguration;
 
-
-use TASoft\EventManager\EventManager;
-use TASoft\Service\ServiceManager;
-
-class SkylineCLIPlugin
-{
-    public function runCLICommand(string $eventName, $event, EventManager $eventManager, ...$arguments)
-    {
-        if(php_sapi_name() == 'cli') {
-            global $argv;
-            array_shift($argv); // Binary file
-            $cmd = array_shift($argv); // first argument which must be the process
-
-            ServiceManager::generalServiceManager()->setParameter("cli.error-handler.enabled", true);
-
-            $processesPath = SkyGetPath('$(C)/processes.config.php');
-            if($processesPath && is_file($processesPath)) {
-
-            } else {
-                trigger_error('Process config file is not available. Please compile first', E_USER_ERROR);
-            }
-
-
-            $eventManager->trigger(SKY_EVENT_TEAR_DOWN);
-            exit();
-        }
-    }
-}
+return [
+    MainKernelConfig::CONFIG_SERVICES => [
+        MainKernelConfig::SERVICE_ERROR_CONTROLLER => [
+            AbstractFileConfiguration::SERVICE_INIT_ARGUMENTS => [
+                'displayHandler' => [10, '$consoleErrorHandler']
+            ]
+        ],
+        'consoleErrorHandler' => [
+            AbstractFileConfiguration::SERVICE_CLASS => ConsoleErrorHandler::class,
+            AbstractFileConfiguration::SERVICE_INIT_ARGUMENTS => [
+                'enabled' => '%cli.error-handler.enabled%'
+            ]
+        ]
+    ]
+];
