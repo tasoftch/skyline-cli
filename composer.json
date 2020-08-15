@@ -2,7 +2,6 @@
   "name": "skyline/cli",
   "description": "This package makes a Skyline Web Application accessible via command line, for example to trigger background tasks from a foreign target.",
   "license": "BSD-3-Clause",
-  "minimum-stability": "dev",
   "authors": [
     {
       "name": "Thomas Abplanalp",
