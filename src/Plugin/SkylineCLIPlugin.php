@@ -42,7 +42,7 @@ class SkylineCLIPlugin
 {
     public function runCLICommand(string $eventName, $event, EventManager $eventManager, ...$arguments)
     {
-        if(php_sapi_name() == 'cli') {
+        if(php_sapi_name() == 'cli' && !isset($_SERVER["SKY_IGNORE_CLI"])) {
             global $argv;
             array_shift($argv); // Binary file
             $cmd = array_shift($argv); // first argument which must be the process
